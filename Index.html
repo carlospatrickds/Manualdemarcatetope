@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Assistente Interativo - TETO PE</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* Cores extraídas da identidade visual do manual */
+            --teto-blue: #0092dd; /* Azul TETO */
+            --teto-pink: #F18EBA; /* Rosa secundário */
+            --teto-yellow: #FFC82E; /* Amarelo secundário */
+            --teto-dark: #333333;
+            --teto-light: #ffffff;
+            --teto-gray: #f4f4f9;
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            height: 100vh;
+            background-color: var(--teto-blue);
+            color: var(--teto-dark);
+            overflow: hidden;
+        }
+
+        /* Área do PDF */
+        #pdf-section {
+            flex: 2;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #pdf-viewer {
+            flex: 1;
+            width: 100%;
+            height: 100%;
+            border: none;
+            border-radius: 12px;
+            background-color: var(--teto-light);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+
+        /* Área do Chat */
+        #chat-section {
+            flex: 1;
+            min-width: 350px;
+            max-width: 450px;
+            background-color: var(--teto-light);
+            display: flex;
+            flex-direction: column;
+            border-left: 5px solid var(--teto-pink);
+            box-shadow: -5px 0 15px rgba(0,0,0,0.1);
+        }
+
+        #chat-header {
+            background-color: var(--teto-light);
+            padding: 20px;
+            text-align: center;
+            border-bottom: 3px solid var(--teto-yellow);
+        }
+
+        #chat-header h2 {
+            margin: 0;
+            color: var(--teto-blue);
+            font-weight: 900;
+            font-size: 24px;
+            letter-spacing: -1px;
+        }
+
+        #chat-header p {
+            margin: 5px 0 0 0;
+            font-size: 12px;
+            color: #666;
+        }
+
+        #chat-history {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            background-color: var(--teto-gray);
+        }
+
+        .message {
+            max-width: 85%;
+            padding: 12px 16px;
+            border-radius: 12px;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+
+        .msg-user {
+            align-self: flex-end;
+            background-color: var(--teto-blue);
+            color: var(--teto-light);
+            border-bottom-right-radius: 2px;
+        }
+
+        .msg-bot {
+            align-self: flex-start;
+            background-color: var(--teto-light);
+            color: var(--teto-dark);
+            border: 1px solid #ddd;
+            border-bottom-left-radius: 2px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .citation {
+            display: inline-block;
+            background-color: var(--teto-yellow);
+            color: var(--teto-dark);
+            font-size: 11px;
+            font-weight: bold;
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin-top: 5px;
+            cursor: pointer;
+        }
+
+        /* Área de Input */
+        #input-area {
+            padding: 15px;
+            background-color: var(--teto-light);
+            display: flex;
+            gap: 10px;
+            border-top: 1px solid #ddd;
+        }
+
+        #user-input {
+            flex: 1;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        #user-input:focus {
+            border-color: var(--teto-blue);
+        }
+
+        #send-btn {
+            background-color: var(--teto-pink);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 0 20px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.1s;
+        }
+
+        #send-btn:hover {
+            background-color: #e07aa5;
+        }
+
+        #send-btn:active {
+            transform: scale(0.95);
+        }
+
+        @media (max-width: 768px) {
+            body { flex-direction: column; }
+            #pdf-section { flex: 1; height: 50vh; padding: 10px; }
+            #chat-section { flex: 1; height: 50vh; max-width: 100%; border-left: none; border-top: 5px solid var(--teto-pink); }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="pdf-section">
+        <iframe id="pdf-viewer" src="arquivo base.pdf#toolbar=0" title="Manual TETO"></iframe>
+    </div>
+
+    <div id="chat-section">
+        <div id="chat-header">
+            <h2>TETO PE</h2>
+            <p>Assistente do Manual de Comunicação Interna</p>
+        </div>
+        <div id="chat-history">
+            <div class="message msg-bot">
+                Olá! Sou o assistente interativo do manual. Você pode me perguntar sobre os canais de comunicação, o TETO News ou boas práticas. Como posso ajudar o time hoje?
+            </div>
+        </div>
+        <div id="input-area">
+            <input type="text" id="user-input" placeholder="Faça sua pergunta aqui..." onkeypress="handleKeyPress(event)">
+            <button id="send-btn" onclick="processUserInput()">Enviar</button>
+        </div>
+    </div>
+
+    <script>
+        const chatHistory = document.getElementById('chat-history');
+        const userInputBox = document.getElementById('user-input');
+
+        function handleKeyPress(e) {
+            if (e.key === 'Enter') {
+                processUserInput();
+            }
+        }
+
+        function processUserInput() {
+            const text = userInputBox.value.trim();
+            if (text === '') return;
+
+            // 1. Adiciona a mensagem do usuário no chat
+            appendMessage(text, 'msg-user');
+            userInputBox.value = '';
+
+            // 2. Simula o tempo de resposta do assistente
+            setTimeout(() => {
+                const response = generateMockResponse(text.toLowerCase());
+                appendMessage(response.text, 'msg-bot', response.page);
+            }, 600);
+        }
+
+        function appendMessage(text, className, page = null) {
+            const msgDiv = document.createElement('div');
+            msgDiv.className = `message ${className}`;
+            msgDiv.innerHTML = text;
+            
+            if (page) {
+                const citeSpan = document.createElement('span');
+                citeSpan.className = 'citation';
+                citeSpan.innerText = `Ver página ${page}`;
+                // Opcional: Atualizar o src do iframe para pular para a página (funciona em alguns navegadores nativos)
+                citeSpan.onclick = () => {
+                    document.getElementById('pdf-viewer').src = `arquivo base.pdf#page=${page}&toolbar=0`;
+                };
+                msgDiv.appendChild(document.createElement('br'));
+                msgDiv.appendChild(citeSpan);
+            }
+
+            chatHistory.appendChild(msgDiv);
+            chatHistory.scrollTop = chatHistory.scrollHeight;
+        }
+
+        /* * =========================================================================
+         * ÁREA DE INTEGRAÇÃO DO AGENTE DE PESQUISA (PROMPT ENGINEERING)
+         * =========================================================================
+         * Como o GitHub Pages é estático, o código abaixo simula um RAG (Retrieval-Augmented Generation) 
+         * buscando palavras-chave mapeadas diretamente do texto do PDF enviado.
+         * * PARA O FUTURO: Substitua a função abaixo por uma chamada 'fetch()' para a sua 
+         * própria API/Agent em Python que processe o PDF e retorne a resposta via IA.
+         * =========================================================================
+         */
+        function generateMockResponse(query) {
+            if (query.includes('teto news') || query.includes('news')) {
+                return {
+                    text: "O TETO News é um pequeno informativo visual com os tópicos da semana. Ele deve ser enviado para os voluntários fixos toda segunda-feira. As seções sugeridas incluem: aniversariantes, eventos futuros, ações da semana e campanhas em andamento.",
+                    page: 5
+                };
+            } else if (query.includes('whatsapp') || query.includes('grupo') || query.includes('mensagem')) {
+                return {
+                    text: "O WhatsApp é usado de duas formas: para voluntários fixos (atualizações regulares, TETO News, aniversários) e pontuais (comunicações específicas em períodos de eventos). Uma boa prática sugerida é montar mensagens-padrão (modelos) para agilizar.",
+                    page: 5
+                };
+            } else if (query.includes('checklist') || query.includes('semanal') || query.includes('tarefa')) {
+                return {
+                    text: "O Checklist Semanal da Comunicação Interna inclui: verificar calendário de eventos, preparar artes (TETO News), revisar com a Criação, agendar mensagens, enviar o TETO News (segundas) e fazer o follow-up com as áreas.",
+                    page: 7
+                };
+            } else if (query.includes('boas práticas') || query.includes('tom de voz') || query.includes('linguagem')) {
+                return {
+                    text: "As boas práticas recomendam um tom de voz institucional, próximo e empático, usando linguagem clara e positiva. Também é fundamental manter rapidez de resposta nos grupos e garantir conformidade ética no uso de imagens.",
+                    page: 11
+                };
+            } else if (query.includes('marca') || query.includes('fonte') || query.includes('redes sociais')) {
+                return {
+                    text: "Este arquivo é focado em Comunicação Interna. No entanto, na seção de Links Úteis, você encontra o direcionamento para o 'Manual de Marca TETO' e o 'Manual de Redes Sociais'.",
+                    page: 12
+                };
+            } else {
+                return {
+                    text: "Não encontrei uma resposta exata para isso no Manual de Comunicação Interna. Tente perguntar sobre os canais de comunicação (E-mail, WhatsApp), sobre o checklist semanal ou sobre as boas práticas de tom de voz.",
+                    page: null
+                };
+            }
+        }
+    </script>
+</body>
+</html>
